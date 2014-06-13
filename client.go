@@ -3,12 +3,10 @@ package main
 import (
   "bufio"
   "fmt"
-  "math/rand"
   "net"
   "net/url"
   "os"
   "strings"
-  "time"
 )
 
 func decode(encoded []byte) (decoded string) {
@@ -60,10 +58,12 @@ func sendCommand(command, name, text string) {
 }
 
 func registerAddress(name string) (address string) {
-  rand.Seed(int64(time.Now().Nanosecond()))
-  port := rand.Intn(99999)
-  address = fmt.Sprintf("127.0.0.1:%d", port)
-  sendCommand("register", name, address)
+  connection, _ := net.Dial("tcp", ":9999")
+  address = connection.LocalAddr().String()
+  message := fmt.Sprintf("register %s %s ", name, url.QueryEscape(address))
+  fmt.Fprint(connection, message)
+  connection.Close()
+  fmt.Print("> ")
   return
 }
 
